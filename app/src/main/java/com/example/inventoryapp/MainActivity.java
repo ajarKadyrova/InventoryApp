@@ -2,6 +2,7 @@ package com.example.inventoryapp;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -31,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
         FloatingActionButton buttonAddNote = findViewById(R.id.fab);
         buttonAddNote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -42,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
-        final ItemAdapter adapter = new ItemAdapter();
+        final ItemAdapter adapter = new ItemAdapter(this);
         recyclerView.setAdapter(adapter);
         itemViewModel = ViewModelProviders.of(this).get(ItemViewModel.class);
         itemViewModel.getAllItems().observe(this, new Observer<List<Item>>() {
@@ -61,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(EditorActivity.EXTRA_PRICE, item.getPrice());
                 intent.putExtra(EditorActivity.EXTRA_QUANTITY, item.getQuantity());
                 intent.putExtra(EditorActivity.EXTRA_SUPPLIER, item.getSupplier());
+                intent.putExtra(EditorActivity.EXTRA_IMAGE, item.getImageUri());
                 startActivityForResult(intent, EDIT_NOTE_REQUEST);
             }
         });
@@ -73,8 +78,9 @@ public class MainActivity extends AppCompatActivity {
             int price = data.getIntExtra(EditorActivity.EXTRA_PRICE, 0);
             int quantity = data.getIntExtra(EditorActivity.EXTRA_QUANTITY, 0);
             String supplier = data.getStringExtra(EditorActivity.EXTRA_SUPPLIER);
+            String image = data.getStringExtra(EditorActivity.EXTRA_IMAGE);
 
-            Item item = new Item(name, price, quantity, supplier);
+            Item item = new Item(name, price, quantity, supplier, image);
             itemViewModel.insert(item);
             Toast.makeText(this, "Note saved", Toast.LENGTH_SHORT).show();
         }
@@ -88,14 +94,16 @@ public class MainActivity extends AppCompatActivity {
             int price = data.getIntExtra(EditorActivity.EXTRA_PRICE, 0);
             int quantity = data.getIntExtra(EditorActivity.EXTRA_QUANTITY, 0);
             String supplier = data.getStringExtra(EditorActivity.EXTRA_SUPPLIER);
+            String image = data.getStringExtra(EditorActivity.EXTRA_IMAGE);
 
-            Item item = new Item(name, price, quantity, supplier);
+            Item item = new Item(name, price, quantity, supplier, image);
             item.setId(id);
             itemViewModel.update(item);
             Toast.makeText(this, "Note updated", Toast.LENGTH_SHORT).show();
         }
         else {
-            Toast.makeText(this, "Note not saved", Toast.LENGTH_SHORT).show();
+            int id = data.getIntExtra(EditorActivity.EXTRA_ID, -1);
+            itemViewModel.deleteItem(id);
         }
     }
     @Override

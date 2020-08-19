@@ -1,6 +1,8 @@
 package com.example.inventoryapp;
 
+import android.content.Context;
 import android.net.Uri;
+import android.os.Environment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +12,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,11 +23,17 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
 
     private List<Item> mItems = new ArrayList<>();
     private OnItemClickListener listener;
+    private Context context;
 
-    public void setItems(List<Item> items){
+    public void setItems(List<Item> items) {
         this.mItems = items;
         notifyDataSetChanged();
     }
+
+    ItemAdapter(Context context) {
+        this.context = context;
+    }
+
     public Item getItemAt(int position) {
         return mItems.get(position);
     }
@@ -41,7 +53,18 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
         holder.price.setText(currentItem.getPrice().toString());
         holder.quantity.setText(currentItem.getQuantity().toString());
         holder.supplier.setText(currentItem.getSupplier());
-        holder.image.setImageURI(Uri.parse(currentItem.getImageUri()));
+        if(currentItem.getImageUri() != null) {
+            Glide
+                    .with(context)
+                    .load(currentItem.getImageUri())
+                    .into(holder.image);
+        }
+        else {
+            Glide
+                    .with(context)
+                    .load(R.drawable.no_image)
+                    .into(holder.image);
+        }
     }
 
     @Override
@@ -70,7 +93,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
                 @Override
                 public void onClick(View view) {
                     int position = getAdapterPosition();
-                    if(listener != null && position != RecyclerView.NO_POSITION) {
+                    if (listener != null && position != RecyclerView.NO_POSITION) {
                         listener.onItemClick(mItems.get(position));
                     }
                 }
@@ -81,6 +104,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ViewHolder> {
     public interface OnItemClickListener {
         void onItemClick(Item item);
     }
+
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }

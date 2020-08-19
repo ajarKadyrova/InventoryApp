@@ -24,11 +24,13 @@ public class ItemRepository {
     public void update(Item item) {
         new UpdateNoteAsyncTask(itemDao).execute(item);
     }
-    public void delete(Item item) {
-        new DeleteNoteAsyncTask(itemDao).execute(item);
-    }
+
     public void deleteAllNotes() {
         new DeleteAllNotesAsyncTask(itemDao).execute();
+    }
+
+    public void deleteItem(int id){
+        new DeleteAsyncTask(itemDao).execute(id);
     }
     public LiveData<List<Item>> getAllNotes() {
         return allNotes;
@@ -55,17 +57,22 @@ public class ItemRepository {
             return null;
         }
     }
-    private static class DeleteNoteAsyncTask extends AsyncTask<Item, Void, Void> {
+
+
+    private static class DeleteAsyncTask extends AsyncTask<Integer, Void, Void>{
         private ItemDao itemDao;
-        private DeleteNoteAsyncTask(ItemDao itemDao) {
+        private DeleteAsyncTask(ItemDao itemDao){
             this.itemDao = itemDao;
         }
+
+
         @Override
-        protected Void doInBackground(Item... items) {
-            itemDao.delete(items[0]);
+        protected Void doInBackground(Integer... integers) {
+            itemDao.deleteItem(integers[0]);
             return null;
         }
     }
+
     private static class DeleteAllNotesAsyncTask extends AsyncTask<Void, Void, Void> {
         private ItemDao itemDao;
         private DeleteAllNotesAsyncTask(ItemDao itemDao) {

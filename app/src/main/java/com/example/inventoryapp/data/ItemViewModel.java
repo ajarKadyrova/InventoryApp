@@ -25,8 +25,8 @@ public class ItemViewModel extends AndroidViewModel {
     public void update(Item item) {
         repository.update(item);
     }
-    public void delete(Item item) {
-        repository.delete(item);
+    public void deleteItem(int id){
+        repository.deleteItem(id);
     }
     public void deleteAllItems() {
         repository.deleteAllNotes();

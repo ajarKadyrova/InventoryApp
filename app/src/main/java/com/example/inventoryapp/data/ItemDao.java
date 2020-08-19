@@ -19,12 +19,12 @@ public interface ItemDao {
     @Update
     void update(Item item);
 
-    @Delete
-    void delete(Item item);
-
     @Query("DELETE FROM items_table")
     void deleteAllNotes();
 
     @Query("SELECT * FROM items_table")
     LiveData<List<Item>> getAllNotes();
+
+    @Query("DELETE FROM items_table WHERE mId = :id")
+    void deleteItem(int id);
 }
