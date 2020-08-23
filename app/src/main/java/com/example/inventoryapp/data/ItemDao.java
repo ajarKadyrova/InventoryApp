@@ -12,11 +12,14 @@ import java.util.List;
 
 @Dao
 public interface ItemDao {
-    @Insert (onConflict = OnConflictStrategy.IGNORE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insert(Item item);
 
-    @Update (onConflict = OnConflictStrategy.REPLACE)
-    void update(Item item);
+
+    //    @Update (onConflict = OnConflictStrategy.REPLACE)
+    @Query("UPDATE items_table SET name = :name, price = :price, quantity = :quantity," +
+            " supplier =:supplier, picture =:picture WHERE mId = :id")
+    void update(int id,String name, Integer price, Integer quantity, String supplier, String picture);
 
     @Query("SELECT * FROM items_table")
     List<Item> getAllNotes();

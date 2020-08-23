@@ -22,6 +22,7 @@ public class EditorPresenter implements EditorContract.Presenter {
     public void insert(Item item) { appDatabase.itemDao().insert(item); }
 
     @Override
-    public void update(Item item) { appDatabase.itemDao().update(item); }
+    public void update(int id, String name, Integer price, Integer quantity, String supplier, String picture)
+    { appDatabase.itemDao().update(id, name, price, quantity, supplier, picture); }
 
 }

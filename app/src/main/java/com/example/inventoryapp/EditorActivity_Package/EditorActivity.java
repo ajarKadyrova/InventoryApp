@@ -84,7 +84,6 @@ public class EditorActivity extends AppCompatActivity implements EditorContract.
     }
 
     private void getItemFromIntent(Item item) {
-
         editTextName.setText(item.getName());
         editTextPrice.setText(String.valueOf(item.getPrice()));
         editTextSupplier.setText(item.getSupplier());
@@ -157,28 +156,18 @@ public class EditorActivity extends AppCompatActivity implements EditorContract.
             return;
         }
         int price = Integer.parseInt(priceString);
-
         Item item = new Item(name,price,quantityValue,supplier,image);
-        Intent intent = getIntent();
-//        getItemFromIntent((Item) intent.getSerializableExtra("LIST"));
 
+        Intent intent = getIntent();
         Item item2 =(Item) intent.getSerializableExtra("LIST");
 
-
-
-//        int id = getIntent().getIntExtra(EXTRA_ID, -1);
-
-//        if (id != -1) {
         if (item2 != null) {
             int id = item2.getId();
-            Log.e("item2 id", String.valueOf(id));
-            presenter.update(item2);
-            Log.e("update",item2.toString());
+            presenter.update(id, item.getName(), item.getPrice(), item.getQuantity(), item.getSupplier(), item.getImageUri());
             Toast.makeText(EditorActivity.this, "Item is updated", Toast.LENGTH_SHORT).show();
         }
         else {
             presenter.insert(item);
-            Log.e("insert",item.toString());
             Toast.makeText(EditorActivity.this, "Item is saved", Toast.LENGTH_SHORT).show();
         }
         finish();

@@ -63,8 +63,6 @@ public class MainActivity extends AppCompatActivity implements MainContract.View
             public void onItemClick(int position, Item item) {
                 Intent intentEditMode = new Intent(MainActivity.this, EditorActivity.class);
                 intentEditMode.putExtra(EditorActivity.EXTRA_ID, item.getId());
-                Log.e("insert MA",item.toString());
-
                 intentEditMode.putExtra("LIST", item);
                 startActivity(intentEditMode);
             }

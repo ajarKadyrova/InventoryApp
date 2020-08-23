@@ -10,7 +10,8 @@ public interface EditorContract {
 
     interface Presenter{
         void insert(Item item);
-        void update(Item item);
+        void update(int id, String name, Integer price, Integer quantity, String supplier, String picture);
+//        void update(Item item);
         void deleteItem(int id);
     }
 }
