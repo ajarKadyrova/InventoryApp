@@ -1,12 +1,16 @@
 package com.example.inventoryapp;
 
+import androidx.annotation.NonNull;
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
-@Entity(tableName = "items_table")
-public class Item {
+import java.io.Serializable;
 
+@Entity(tableName = "items_table")
+public class Item implements Serializable {
+
+    @NonNull
     @PrimaryKey(autoGenerate = true)
     private int mId;
     @ColumnInfo(name = "name")
@@ -57,4 +61,16 @@ public class Item {
     }
 
     public String getImageUri() { return mImageUri; }
+
+    @Override
+    public String toString() {
+        return "Item{" +
+                "mId=" + mId +
+                ", mName='" + mName + '\'' +
+                ", mPrice=" + mPrice +
+                ", mQuantity=" + mQuantity +
+                ", mSupplier='" + mSupplier + '\'' +
+                ", mImageUri='" + mImageUri + '\'' +
+                '}';
+    }
 }

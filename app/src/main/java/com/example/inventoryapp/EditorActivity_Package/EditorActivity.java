@@ -1,11 +1,10 @@
-package com.example.inventoryapp;
+package com.example.inventoryapp.EditorActivity_Package;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,24 +19,20 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.example.inventoryapp.data.ItemViewModel;
+import com.example.inventoryapp.Item;
+import com.example.inventoryapp.MainActivity_Package.MainActivity;
+import com.example.inventoryapp.R;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.Serializable;
 
-public class EditorActivity extends AppCompatActivity {
+public class EditorActivity extends AppCompatActivity implements EditorContract.View, Serializable {
 
-    public static final String EXTRA_ID = "com.codinginflow.architectureexample.EXTRA_ID";
-    public static final String EXTRA_NAME = "com.codinginflow.architectureexample.EXTRA_NAME";
-    public static final String EXTRA_PRICE = "com.codinginflow.architectureexample.EXTRA_PRICE";
-    public static final String EXTRA_QUANTITY = "com.codinginflow.architectureexample.EXTRA_QUANTITY";
-    public static final String EXTRA_SUPPLIER = "com.codinginflow.architectureexample.EXTRA_SUPPLIER";
-    public static final String EXTRA_IMAGE = "com.codinginflow.architectureexample.EXTRA_IMAGE" ;
+    public static final String EXTRA_ID = "com.example.inventoryapp.EditorActivity_Package.EXTRA_ID";
 
     private static final int GALLERY_REQUEST_CODE = 123;
+    EditorContract.Presenter presenter;
     private EditText editTextName;
     private EditText editTextPrice;
     private EditText editTextSupplier;
@@ -49,12 +44,14 @@ public class EditorActivity extends AppCompatActivity {
     private Button buttonImage;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_editor);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        presenter = new EditorPresenter(this,getApplication());
 
         editTextName = findViewById(R.id.name_editText);
         editTextPrice = findViewById(R.id.price_editText);
@@ -75,24 +72,32 @@ public class EditorActivity extends AppCompatActivity {
         quantity.setMinValue(1);
         quantity.setMaxValue(10);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_close);
+
         Intent intent = getIntent();
         if (intent.hasExtra(EXTRA_ID)) {
             setTitle("Edit Note");
+            getItemFromIntent((Item) intent.getSerializableExtra("LIST"));
+        }
+        else {
+            setTitle("Add Note");
+        }
+    }
 
-            editTextName.setText(intent.getStringExtra(EXTRA_NAME));
-            editTextPrice.setText(String.valueOf(intent.getIntExtra(EXTRA_PRICE, 1)));
-            editTextSupplier.setText(intent.getStringExtra(EXTRA_SUPPLIER));
-            quantity.setValue(intent.getIntExtra(EXTRA_QUANTITY, 1));
-            galleryImage = intent.getStringExtra(EXTRA_IMAGE);
-            Glide
+    private void getItemFromIntent(Item item) {
+
+        editTextName.setText(item.getName());
+        editTextPrice.setText(String.valueOf(item.getPrice()));
+        editTextSupplier.setText(item.getSupplier());
+        quantity.setValue(item.getQuantity());
+        galleryImage = item.getImageUri();
+        Glide
                     .with(getApplicationContext())
                     .load(galleryImage)
                     .into(imageView);
-
-
+        if(galleryImage == null){
+            buttonImage.setText("Set image");
+        } else{
             buttonImage.setText("Change image");
-        } else {
-            setTitle("Add Note");
         }
     }
 
@@ -122,19 +127,18 @@ public class EditorActivity extends AppCompatActivity {
                 saveNote();
                 return true;
             case R.id.delete_item_btn:
-                // setup the alert builder
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setMessage("Are you sure you want to delete this item?");
-                // add the buttons
                 builder.setPositiveButton("Delete", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        deleteNote();
+                        int id = getIntent().getIntExtra(EXTRA_ID, -1);
+                        presenter.deleteItem(id);
+                        finish();
                         Toast.makeText(EditorActivity.this, "Item is deleted", Toast.LENGTH_SHORT).show();
                     }
                 });
                 builder.setNegativeButton("Cancel", null);
-                // create and show the alert dialog
                 AlertDialog dialog = builder.create();
                 dialog.show();
                 return true;
@@ -149,32 +153,34 @@ public class EditorActivity extends AppCompatActivity {
         String supplier = editTextSupplier.getText().toString();
         int quantityValue = quantity.getValue();
         if (name.trim().isEmpty() || supplier.trim().isEmpty() || priceString.trim().isEmpty()) {
-            Toast.makeText(this, "Please insert a title and description", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Please make sure all the fields are entered", Toast.LENGTH_SHORT).show();
             return;
         }
         int price = Integer.parseInt(priceString);
-        Intent data = new Intent();
-        data.putExtra(EXTRA_NAME, name);
-        data.putExtra(EXTRA_PRICE, price);
-        data.putExtra(EXTRA_QUANTITY, quantityValue);
-        data.putExtra(EXTRA_SUPPLIER, supplier);
-        data.putExtra(EXTRA_IMAGE, image);
-        int id = getIntent().getIntExtra(EXTRA_ID, -1);
-        if (id != -1) {
-            data.putExtra(EXTRA_ID, id);
-        }
-        setResult(RESULT_OK, data);
-        finish();
-    }
 
-    private void deleteNote(){
-        Intent data = new Intent();
-        int id = getIntent().getIntExtra(EXTRA_ID, -1);
-        if (id != -1){
-            data.putExtra(EXTRA_ID, id);
+        Item item = new Item(name,price,quantityValue,supplier,image);
+        Intent intent = getIntent();
+//        getItemFromIntent((Item) intent.getSerializableExtra("LIST"));
+
+        Item item2 =(Item) intent.getSerializableExtra("LIST");
+
+
+
+//        int id = getIntent().getIntExtra(EXTRA_ID, -1);
+
+//        if (id != -1) {
+        if (item2 != null) {
+            int id = item2.getId();
+            Log.e("item2 id", String.valueOf(id));
+            presenter.update(item2);
+            Log.e("update",item2.toString());
+            Toast.makeText(EditorActivity.this, "Item is updated", Toast.LENGTH_SHORT).show();
         }
-        Log.e("editorActivity", id + "");
-        setResult(RESULT_CANCELED, data);
+        else {
+            presenter.insert(item);
+            Log.e("insert",item.toString());
+            Toast.makeText(EditorActivity.this, "Item is saved", Toast.LENGTH_SHORT).show();
+        }
         finish();
     }
 

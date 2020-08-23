@@ -1,9 +1,8 @@
 package com.example.inventoryapp.data;
 
-import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
-import androidx.room.Delete;
 import androidx.room.Insert;
+import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
 import androidx.room.Update;
 
@@ -13,17 +12,17 @@ import java.util.List;
 
 @Dao
 public interface ItemDao {
-    @Insert
+    @Insert (onConflict = OnConflictStrategy.IGNORE)
     void insert(Item item);
 
-    @Update
+    @Update (onConflict = OnConflictStrategy.REPLACE)
     void update(Item item);
+
+    @Query("SELECT * FROM items_table")
+    List<Item> getAllNotes();
 
     @Query("DELETE FROM items_table")
     void deleteAllNotes();
-
-    @Query("SELECT * FROM items_table")
-    LiveData<List<Item>> getAllNotes();
 
     @Query("DELETE FROM items_table WHERE mId = :id")
     void deleteItem(int id);
